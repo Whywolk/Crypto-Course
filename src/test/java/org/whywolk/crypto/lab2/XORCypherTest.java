@@ -7,8 +7,8 @@ public class XORCypherTest extends Assert {
 
     @Test
     public void testEncryption() {
-        String message = "HELLOладноそれが";
-        Integer key = 127;
+        String message = "Alex desu";
+        String key = "スッパシクレっと";
 
         String encrypted = null;
         try {

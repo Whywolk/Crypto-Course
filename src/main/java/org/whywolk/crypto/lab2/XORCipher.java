@@ -25,6 +25,31 @@ public class XORCipher {
     }
 
     /**
+     * Encrypt message using key
+     *
+     * @param message open message
+     * @param key password
+     * @return encrypted message
+     * @throws Exception
+     */
+    public static String encrypt(String message, String key) {
+        byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
+        byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
+        StringBuilder hex = new StringBuilder();
+
+        for (int cluster = 0; cluster < messageBytes.length / keyBytes.length + 1; cluster++) {
+            for (int i = 0; i < keyBytes.length; i++) {
+                int idx = cluster*keyBytes.length + i;
+                if (idx < messageBytes.length) {
+                    messageBytes[idx] ^= keyBytes[i];
+                    hex.append(String.format("%02x", messageBytes[idx]));
+                } else break;
+            }
+        }
+        return hex.toString();
+    }
+
+    /**
      * Decrypt message using key
      *
      * @param encMessage encrypted message
@@ -40,4 +65,26 @@ public class XORCipher {
         return new String(messageBytes, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Decrypt message using key
+     *
+     * @param encMessage encrypted message
+     * @param key password
+     * @return decrypted message
+     * @throws Exception
+     */
+    public static String decrypt(String encMessage, String key) throws Exception {
+        byte[] messageBytes = HexFormat.of().parseHex(encMessage);
+        byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
+
+        for (int cluster = 0; cluster < messageBytes.length / keyBytes.length + 1; cluster++) {
+            for (int i = 0; i < keyBytes.length; i++) {
+                int idx = cluster*keyBytes.length + i;
+                if (idx < messageBytes.length) {
+                    messageBytes[idx] ^= keyBytes[i];
+                } else break;
+            }
+        }
+        return new String(messageBytes, StandardCharsets.UTF_8);
+    }
 }
