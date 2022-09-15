@@ -57,7 +57,7 @@ public class PolybiusSquareTest extends Assert {
     public void testEncryption() {
         String message = "HELLO";
         String key = "PASWORD";
-        String expected = "I/JRMMP";
+        String expected = "IRMMP";
 
         String encrypted = null;
         try {
@@ -74,21 +74,20 @@ public class PolybiusSquareTest extends Assert {
     public void testPasswordNotUnique() throws Exception {
         String message = "HELLO";
         String key = "PASSWORD";
-
         String encrypted = PolybiusSquare.encrypt(message, key);
     }
 
     @Test(expected = Exception.class)
     public void testPasswordLong() throws Exception {
         String message = "HELLO";
-        String key = "qwertyuiopasdfghjklzxcvbnm";
+        String key = "QWERTYUIOPASDFGHJKLZXCVBNM";
         String encrypted = PolybiusSquare.encrypt(message, key);
     }
 
     @Test(expected = Exception.class)
-    public void testPasswordEmpty() throws Exception {
+    public void testWrongLetters() throws Exception {
         String message = "HELLO";
-        String key = "";
+        String key = "Some Text";
         String encrypted = PolybiusSquare.encrypt(message, key);
     }
 }
