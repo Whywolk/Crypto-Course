@@ -1,7 +1,6 @@
 package org.whywolk.crypto.lab1;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;

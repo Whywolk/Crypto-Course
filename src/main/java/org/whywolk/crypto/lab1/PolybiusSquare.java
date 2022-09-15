@@ -17,7 +17,7 @@ public class PolybiusSquare {
     );
 
     /**
-     * Encrypts message using key
+     * Encrypt message using key
      *
      * @param message open message
      * @param key password, if empty then A-Z password
@@ -52,7 +52,7 @@ public class PolybiusSquare {
     }
 
     /**
-     * Decrypts message using key
+     * Decrypt message using key
      *
      * @param encMessage encrypted message
      * @param key password, if empty then A-Z password
