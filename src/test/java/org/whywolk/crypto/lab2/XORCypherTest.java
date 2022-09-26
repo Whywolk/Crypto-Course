@@ -10,20 +10,43 @@ public class XORCypherTest extends Assert {
         String message = "Alex desu";
         String key = "スッパシクレっと";
 
-        String encrypted = null;
-        try {
-            encrypted = XORCipher.encrypt(message, key);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        String decrypted = null;
-        try {
-            decrypted = XORCipher.decrypt(encrypted, key);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String encrypted = XORCipher.encrypt(message, key);
+        String decrypted = XORCipher.decrypt(encrypted, key);
 
         assertEquals(message, decrypted);
+    }
+
+    @Test
+    public void testEncryptionEmptyPassword() {
+        String message = "Alex desu";
+        String key = "";
+
+        String encrypted = XORCipher.encrypt(message, key);
+        String decrypted = XORCipher.decrypt(encrypted, key);
+
+        assertEquals(message, decrypted);
+    }
+
+    @Test
+    public void testEncryptionEmptyMessage() {
+        String message = "";
+        String key = "";
+
+        String encrypted = XORCipher.encrypt(message, key);
+        String decrypted = XORCipher.decrypt(encrypted, key);
+
+        assertEquals(message, decrypted);
+    }
+
+    @Test
+    public void testWrongPassword() {
+        String message = "Alex desu";
+        String key = "スッパシクレっと";
+        String wrongKey = "some_pass";
+
+        String encrypted = XORCipher.encrypt(message, key);
+        String decrypted = XORCipher.decrypt(encrypted, wrongKey);
+
+        assertNotEquals(message, decrypted);
     }
 }

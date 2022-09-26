@@ -89,4 +89,29 @@ public class PolybiusSquareTest extends Assert {
         String key = "Some Text";
         String encrypted = PolybiusSquare.encrypt(message, key);
     }
+
+    @Test
+    public void testWrongPassword() {
+        String message = "HELLO";
+        String key = "PASWORD";
+        String wrongKey = "SOME";
+
+        String encrypted = null;
+        try {
+            encrypted = PolybiusSquare.encrypt(message, key);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+
+        String decrypted = null;
+        try {
+            decrypted = PolybiusSquare.decrypt(encrypted, wrongKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+
+        assertNotEquals(message, decrypted);
+    }
 }

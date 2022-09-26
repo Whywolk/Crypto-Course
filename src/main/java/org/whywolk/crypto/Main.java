@@ -6,11 +6,12 @@ import org.whywolk.crypto.lab2.XORCipher;
 public class Main {
 
     public static void main(String[] args) {
-//        lab1();
+        lab1();
         lab2();
     }
 
     private static void lab1() {
+        System.out.println("_______Lab_1_______");
         String name = "SHIRSHOVALEXEYALEXANDROVICH";
         String university = "NIZHNIYNOVGORODTECHNICALUNIVERSITY";
         System.out.printf("Original messages: \n\t%s \n\t%s\n", name, university);
@@ -29,7 +30,8 @@ public class Main {
     }
 
     private static void lab2() {
-        String name = "Shirshov Alexey Alexandrovich";
+        System.out.println("_______Lab_2_______");
+        String name = "Shirshov Alexey Alexandrovich すごい!!!!";
         String university = "Nizhniy Novgorod Technical University";
         System.out.printf("Original messages: \n\t%s \n\t%s\n", name, university);
 

@@ -12,8 +12,11 @@ public class PolybiusSquare {
     private static final int tableHeight = 5;
 
     private static final List<String> englishLetters = Arrays.asList(
-            "A", "B", "C", "D", "E", "F", "G", "H", "I/J", "K",
-            "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
+            "A", "B", "C", "D", "E",
+            "F", "G", "H", "I/J", "K",
+            "L", "M", "N", "O", "P",
+            "Q", "R", "S", "T", "U",
+            "V", "W", "X", "Y", "Z"
     );
 
     /**

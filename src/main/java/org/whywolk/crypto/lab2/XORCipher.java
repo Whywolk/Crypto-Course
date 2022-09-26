@@ -1,5 +1,6 @@
 package org.whywolk.crypto.lab2;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
 
@@ -11,16 +12,16 @@ public class XORCipher {
      * @param message open message
      * @param key password
      * @return encrypted message
-     * @throws Exception
      */
-    public static String encrypt(String message, Integer key) throws Exception {
+    public static String encrypt(String message, Integer key) {
         byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
+        byte[] keyBytes = ByteBuffer.allocate(4).putInt(key).array();
         StringBuilder hex = new StringBuilder();
 
-        for (int i = 0; i < messageBytes.length; i++) {
-            messageBytes[i] ^= key.byteValue();
-            hex.append(String.format("%02x", messageBytes[i]));
+        for (byte b: xor(messageBytes, keyBytes)) {
+            hex.append(String.format("%02x", b));
         }
+
         return hex.toString();
     }
 
@@ -30,39 +31,42 @@ public class XORCipher {
      * @param message open message
      * @param key password
      * @return encrypted message
-     * @throws Exception
      */
     public static String encrypt(String message, String key) {
         byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
         byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
         StringBuilder hex = new StringBuilder();
 
-        for (int cluster = 0; cluster < messageBytes.length / keyBytes.length + 1; cluster++) {
-            for (int i = 0; i < keyBytes.length; i++) {
-                int idx = cluster*keyBytes.length + i;
-                if (idx < messageBytes.length) {
-                    messageBytes[idx] ^= keyBytes[i];
-                    hex.append(String.format("%02x", messageBytes[idx]));
-                } else break;
-            }
+        for (byte b: xor(messageBytes, keyBytes)) {
+            hex.append(String.format("%02x", b));
         }
+
         return hex.toString();
     }
 
     /**
-     * Decrypt message using key
+     * XOR message with key
      *
-     * @param encMessage encrypted message
-     * @param key password
-     * @return decrypted message
-     * @throws Exception
+     * @param messageBytes message
+     * @param keyBytes password
+     * @return xor'ed message
      */
-    public static String decrypt(String encMessage, Integer key) throws Exception {
-        byte[] messageBytes = HexFormat.of().parseHex(encMessage);
-        for (int i = 0; i < messageBytes.length; i++) {
-            messageBytes[i] ^= key.byteValue();
+    public static byte[] xor(byte[] messageBytes, byte[] keyBytes) {
+        byte[] newMessageBytes = messageBytes.clone();
+
+        // divide messageBytes into clusters with keyBytes length
+        for (int cluster = 0; cluster <= (newMessageBytes.length / (keyBytes.length + 1)); cluster++) {
+            // xor every byte of cluster with the same key byte
+            for (int i = 0; i < keyBytes.length; i++) {
+                int idx = cluster*keyBytes.length + i;
+
+                // case, when keyBytes length more than cluster length
+                if (idx < newMessageBytes.length) {
+                    newMessageBytes[idx] ^= keyBytes[i];
+                } else break;
+            }
         }
-        return new String(messageBytes, StandardCharsets.UTF_8);
+        return newMessageBytes;
     }
 
     /**
@@ -71,20 +75,29 @@ public class XORCipher {
      * @param encMessage encrypted message
      * @param key password
      * @return decrypted message
-     * @throws Exception
      */
-    public static String decrypt(String encMessage, String key) throws Exception {
+    public static String decrypt(String encMessage, Integer key) {
+        byte[] messageBytes = HexFormat.of().parseHex(encMessage);
+        byte[] keyBytes = ByteBuffer.allocate(4).putInt(key).array();
+
+        byte[] decryptedMessage = xor(messageBytes, keyBytes);
+
+        return new String(decryptedMessage, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Decrypt message using key
+     *
+     * @param encMessage encrypted message
+     * @param key password
+     * @return decrypted message
+     */
+    public static String decrypt(String encMessage, String key) {
         byte[] messageBytes = HexFormat.of().parseHex(encMessage);
         byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
 
-        for (int cluster = 0; cluster < messageBytes.length / keyBytes.length + 1; cluster++) {
-            for (int i = 0; i < keyBytes.length; i++) {
-                int idx = cluster*keyBytes.length + i;
-                if (idx < messageBytes.length) {
-                    messageBytes[idx] ^= keyBytes[i];
-                } else break;
-            }
-        }
-        return new String(messageBytes, StandardCharsets.UTF_8);
+        byte[] decryptedMessage = xor(messageBytes, keyBytes);
+
+        return new String(decryptedMessage, StandardCharsets.UTF_8);
     }
 }
