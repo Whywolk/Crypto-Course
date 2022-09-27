@@ -17,12 +17,12 @@ public class Main {
         System.out.printf("Original messages: \n\t%s \n\t%s\n", name, university);
 
         try {
-            String nameEnc = PolybiusSquare.encrypt(name, "");
-            String universityEnc = PolybiusSquare.encrypt(university, "");
+            String nameEnc = PolybiusSquare.encrypt(name, "MYPASWORD");
+            String universityEnc = PolybiusSquare.encrypt(university, "SECRT");
             System.out.printf("Encrypted: \n\t%s \n\t%s\n", nameEnc, universityEnc);
 
-            String nameDec = PolybiusSquare.decrypt(nameEnc, "");
-            String universityDec = PolybiusSquare.decrypt(universityEnc, "");
+            String nameDec = PolybiusSquare.decrypt(nameEnc, "MYPASWORD");
+            String universityDec = PolybiusSquare.decrypt(universityEnc, "SECRT");
             System.out.printf("Decrypted: \n\t%s \n\t%s\n", nameDec, universityDec);
         } catch (Exception e) {
             e.printStackTrace();
@@ -31,17 +31,17 @@ public class Main {
 
     private static void lab2() {
         System.out.println("_______Lab_2_______");
-        String name = "Shirshov Alexey Alexandrovich すごい!!!!";
+        String name = "Shirshov Alexey Alexandrovich";
         String university = "Nizhniy Novgorod Technical University";
         System.out.printf("Original messages: \n\t%s \n\t%s\n", name, university);
 
         try {
             String nameEnc = XORCipher.encrypt(name, "pass");
-            String universityEnc = XORCipher.encrypt(university, "スッパシクレっと1234");
+            String universityEnc = XORCipher.encrypt(university, "hard_pass");
             System.out.printf("Encrypted: \n\t%s \n\t%s\n", nameEnc, universityEnc);
 
-            String nameDec = XORCipher.decrypt(nameEnc, "pass");
-            String universityDec = XORCipher.decrypt(universityEnc, "スッパシクレっと1234");
+            String nameDec = XORCipher.decrypt(nameEnc, "kass");
+            String universityDec = XORCipher.decrypt(universityEnc, "hard_pas");
             System.out.printf("Decrypted: \n\t%s \n\t%s\n", nameDec, universityDec);
         } catch (Exception e) {
             e.printStackTrace();
