@@ -40,8 +40,8 @@ public class Main {
             String universityEnc = XORCipher.encrypt(university, "hard_pass");
             System.out.printf("Encrypted: \n\t%s \n\t%s\n", nameEnc, universityEnc);
 
-            String nameDec = XORCipher.decrypt(nameEnc, "kass");
-            String universityDec = XORCipher.decrypt(universityEnc, "hard_pas");
+            String nameDec = XORCipher.decrypt(nameEnc, "pass");
+            String universityDec = XORCipher.decrypt(universityEnc, "hard_pass");
             System.out.printf("Decrypted: \n\t%s \n\t%s\n", nameDec, universityDec);
         } catch (Exception e) {
             e.printStackTrace();
