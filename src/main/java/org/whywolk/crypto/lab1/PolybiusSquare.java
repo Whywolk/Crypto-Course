@@ -73,7 +73,7 @@ public class PolybiusSquare {
                 String curChar = Character.toString(letter);
 
                 // There is no difference between 'I' and 'J'
-                if (curChar.equals("I")) {
+                if (curChar.equals("I") || curChar.equals("J")) {
                     curChar = "I/J";
                 }
                 int[] ij = getLetterIdx(curChar, table);
