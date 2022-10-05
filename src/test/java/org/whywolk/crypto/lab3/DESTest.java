@@ -21,7 +21,9 @@ public class DESTest extends Assert {
 
         assertArrayEquals(expected, IP);
     }
-//
-//    @Test
-//    public void
+
+    @Test
+    public void testExtension() {
+
+    }
 }

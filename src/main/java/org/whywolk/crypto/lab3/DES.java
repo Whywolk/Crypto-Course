@@ -92,6 +92,8 @@ public class DES {
             {2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11}
     };
 
+    private static final int[][][] S = {S1, S2, S3, S4, S5, S6, S7, S8};
+
     private static final int[] C0_TABLE = {
             57, 49, 41, 33, 25, 17,  9,  1, 58, 50, 42, 34, 26, 18,
             10,  2, 59, 51, 43, 35, 27, 19, 11,  3, 60, 52, 44, 36
@@ -112,41 +114,6 @@ public class DES {
             51, 45, 33, 48, 44, 49, 39, 56, 34, 53, 46, 42, 50, 36, 29, 32
     };
 
-    protected static byte[] initialPermutation(byte[] input) {
-//        int[] bites = new int[input.length * 8];
-//
-//        for (int i = 0; i < bites.length; i++) {
-//            bites[i] = i+1;
-//        }
-//
-//        int[] out = bites.clone();
-//
-//        for (int i = 0; i < bites.length; i++) {
-//            out[i] = bites[IPTable[i]-1];
-//        }
-        byte[] inputBits = new byte[input.length * 8];
-        // split every byte into bits
-        for (int i = 0; i < inputBits.length; i++) {
-            byte curByte = input[i/8];
-            inputBits[i] = (byte) ((curByte >>> (7 - i%8)) & 1);
-        }
-
-        byte[] outBits = new byte[input.length * 8];
-        // bits permutation
-        for (int i = 0; i < outBits.length; i++) {
-            int idx = IP_TABLE[i] - 1;
-            outBits[i] = inputBits[idx];
-        }
-
-        byte[] out = new byte[input.length];
-        // convert bits to bytes
-        for (int i = 0; i < outBits.length; i++) {
-            out[i/8] += outBits[i] << (7 - i%8);
-        }
-
-        return out;
-    }
-
     public static byte[] encryptBlock(byte[] message, byte[] key) {
         if (message.length > 8) {
             throw new RuntimeException("Message length should be 64 bits");
@@ -154,8 +121,160 @@ public class DES {
         byte[] IP = DES.initialPermutation(message);
         byte[] left = Arrays.copyOfRange(IP, 0, IP.length/2);
         byte[] right = Arrays.copyOfRange(IP, IP.length/2, IP.length);
+
+        for (int stage = 1; stage <= 16; stage++) {
+            byte[] genKey = DES.generateKey(key, stage);
+            byte[] resF = DES.f(right, genKey);
+            for (int i = 0; i < resF.length; i++) {
+                resF[i] ^= left[i];
+            }
+            left = right;
+            right = resF;
+        }
+
         return left;
     }
 
+    public static byte[] decryptBlock(byte[] message, byte[] key) {
+        if (message.length > 8) {
+            throw new RuntimeException("Message length should be 64 bits");
+        }
+        return new byte[1];
+    }
 
+    protected static byte[] initialPermutation(byte[] input) {
+        byte[] inputBits = DES.toBits(input);
+
+        byte[] outBits = new byte[inputBits.length];
+        // bits permutation
+        for (int i = 0; i < outBits.length; i++) {
+            int idx = IP_TABLE[i] - 1;
+            outBits[i] = inputBits[idx];
+        }
+
+        return DES.toBytes(outBits);
+    }
+
+    protected static byte[] f(byte[] vec, byte[] key) {
+        if (vec.length != 4) throw new RuntimeException("Vector length should be 32 bits");
+        if (key.length != 6) throw new RuntimeException("Key length should be 48 bits");
+
+        // extend vector from 32 bits to 48 bits
+        byte[] extendedVec = DES.extend(vec);
+
+        // xor 48 bits extended vector with 48 bits key
+        for (int i = 0; i < extendedVec.length; i++) {
+            extendedVec[i] ^= key[i];
+        }
+
+        // split vector into eight 6 bits vectors
+        byte[] B = DES.toBits(extendedVec);
+        byte[][] Bi = new byte[8][6];
+        for (int i = 0; i < B.length; i++) {
+            Bi[i / 8][i % 6] = B[i];
+        }
+
+        // transmutation 6 bits Bi to 4 bits newBi
+        byte[] newBi = new byte[8];
+        byte[] newB = new byte[B.length];
+        for (int i = 0; i < newBi.length; i++) {
+            // first and last bits of B[i]
+            int a = (Bi[i][0] << 1) + (Bi[i][Bi.length-1]);
+
+            // center 4 bits of B[i]
+            int b = 0;
+            for (int j = 4; j >= 1; j--) {
+                b += Bi[i][j] << (j-1);
+            }
+            newBi[i] = (byte) S[i][a][b];
+        }
+
+        // newBi bits array to newB bits array
+        for (int i = 0; i < newBi.length; i++) {
+            byte[] newBiBits = DES.toBits(new byte[]{newBi[i]});
+            for (int j = 0; j < newBiBits.length; j++) {
+                newB[i*8 + j] = newBiBits[j];
+            }
+        }
+
+        // permutation newB with P_TABLE
+        byte[] outBits = new byte[newB.length];
+        for (int i = 0; i < P_TABLE.length; i++) {
+            int idx = P_TABLE[i] - 1;
+            outBits[i] = newB[idx];
+        }
+
+        return DES.toBytes(outBits);
+    }
+
+    // Extend vec from 32 bits to 48 bits with E_TABLE
+    protected static byte[] extend(byte[] vec) {
+        byte[] vecBits = DES.toBits(vec);
+        byte[] extendedVec = new byte[DES.E_TABLE.length];
+
+        for (int i = 0; i < extendedVec.length; i++) {
+            int idx = E_TABLE[i] - 1;
+            extendedVec[i] = vecBits[idx];
+        }
+
+        return DES.toBytes(extendedVec);
+    }
+
+    protected static byte[] generateKey(byte[] key, int stage) {
+        if (key.length != 8) throw new RuntimeException();
+        byte[] keyBits = DES.toBits(key);
+        byte[] C0 = new byte[C0_TABLE.length];
+        byte[] D0 = new byte[D0_TABLE.length];
+        byte[] keyBitsReverse = DES.reverseArray(keyBits);
+
+        for (int i = 0; i < C0_TABLE.length; i++) {
+            int idx = C0_TABLE[i];
+            C0[i] = keyBitsReverse[idx - 1];
+        }
+        for (int i = 0; i < D0_TABLE.length; i++) {
+            int idx = D0_TABLE[i];
+            D0[i] = keyBitsReverse[idx - 1];
+        }
+
+    }
+
+    private static byte[] toBits(byte[] bytes) {
+        byte[] bits = new byte[bytes.length * 8];
+
+        // split every byte into bits
+        for (int i = 0; i < bits.length; i++) {
+            byte curByte = bytes[i / 8];
+            bits[i] = (byte) ((curByte >>> (7 - i%8)) & 1);
+        }
+
+        return bits;
+    }
+
+    private static byte[] toBytes(byte[] bits) {
+        byte[] bytes = new byte[bits.length / 8];
+
+        // convert bits to bytes
+        for (int i = 0; i < bits.length; i++) {
+            bytes[i / 8] += bits[i] << (7 - i%8);
+        }
+
+        return bytes;
+    }
+
+    private static byte[] reverseArray(byte[] arr) {
+        byte[] newArr = arr.clone();
+        for (int i = 0; i < newArr.length / 2; i++) {
+            byte temp = newArr[i];
+            newArr[i] = newArr[newArr.length - i - 1];
+            newArr[newArr.length - i - 1] = temp;
+        }
+        return newArr;
+    }
+
+    private static byte[] cyclicShiftLeft(byte[] arr, int count) {
+        byte[] tmp = arr.clone();
+        for (int i = 0; i < arr.length; i++) {
+
+        }
+    }
 }
