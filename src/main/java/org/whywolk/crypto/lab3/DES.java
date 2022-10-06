@@ -333,13 +333,6 @@ public class DES {
         return bits;
     }
 
-//    protected static byte toByte(byte[] bits) {
-//        byte b = 0;
-//        for (int i = 0; i < bits.length; i++) {
-//            b[i / 8] += bits[i] << (i%8);
-//        }
-//    }
-
     protected static byte[] toBytes(byte[] bits) {
         byte[] bytes = new byte[bits.length / 8];
 

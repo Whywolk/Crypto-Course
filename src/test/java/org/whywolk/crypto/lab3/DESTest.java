@@ -2,10 +2,7 @@ package org.whywolk.crypto.lab3;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-
 
 public class DESTest extends Assert {
 
