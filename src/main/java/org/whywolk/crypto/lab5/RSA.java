@@ -1,33 +1,45 @@
 package org.whywolk.crypto.lab5;
 
-import org.whywolk.crypto.lab3.DESUtils;
-
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.HexFormat;
 import java.util.Random;
 
 public class RSA {
 
     public static String encrypt(String message, String[] publicKey) {
+        int len = publicKey[0].length() - 2;
+//        if (message.length()*2 >= len) throw new RuntimeException("Message length should be lesser than key length");
 
         BigInteger e = keyFromHex(publicKey[0]);
         BigInteger n = keyFromHex(publicKey[1]);
 
         StringBuilder encMessage = new StringBuilder();
-        BigInteger enc = encrypt(new BigInteger(message.getBytes(StandardCharsets.UTF_8)), e, n);
-        encMessage.append(String.format("%0260x", enc));
+        while (message.length() != 0) {
+            int size = Math.min(message.length(), len/2 - 1);
+            String tmp = message.substring(0, size);
+            message = message.substring(size);
+            BigInteger enc = encrypt(new BigInteger(tmp.getBytes(StandardCharsets.UTF_8)), e, n);
+            encMessage.append(String.format("%0" + (len) + "x", enc));
+        }
 
         return encMessage.toString();
     }
 
     public static String decrypt(String message, String[] privateKey) {
+        int len = privateKey[0].length() - 2;
+//        if (message.length() > len) throw new RuntimeException("Message length should be lesser than key length");
+
         BigInteger d = keyFromHex(privateKey[0]);
         BigInteger n = keyFromHex(privateKey[1]);
 
         StringBuilder decMessage = new StringBuilder();
-        BigInteger enc = decrypt(new BigInteger(HexFormat.of().parseHex(message)), d, n);
-        decMessage.append(new String(enc.toByteArray(), StandardCharsets.UTF_8));
+        while (message.length() != 0) {
+            int size = Math.min(message.length(), len);
+            String tmp = message.substring(0, size);
+            message = message.substring(size);
+            BigInteger dec = decrypt(new BigInteger(tmp, 16), d, n);
+            decMessage.append(new String(dec.toByteArray(), StandardCharsets.UTF_8));
+        }
 
         return decMessage.toString();
     }
@@ -44,15 +56,14 @@ public class RSA {
         return new BigInteger(key, 16);
     }
 
-    public static String keyToHex(BigInteger key) {
-        String keyStr = key.toString(16);
-        return keyStr;
+    public static String keyToHex(BigInteger key, int bitLength) {
+        return String.format("%0+" + (bitLength/2 + 2) + "x", key);
     }
 
     public static String[][] getKeys(int bitLength) {
         BigInteger[] keys = generateKeys(bitLength);
-        String[] publicKey = new String[] {keyToHex(keys[0]), keyToHex(keys[1])};
-        String[] privateKey = new String[] {keyToHex(keys[2]), keyToHex(keys[3])};
+        String[] publicKey = new String[] {keyToHex(keys[0], bitLength), keyToHex(keys[1], bitLength)};
+        String[] privateKey = new String[] {keyToHex(keys[2], bitLength), keyToHex(keys[3], bitLength)};
         return new String[][] {publicKey, privateKey};
     }
 
