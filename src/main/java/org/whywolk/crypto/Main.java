@@ -3,6 +3,7 @@ package org.whywolk.crypto;
 import org.whywolk.crypto.lab1.PolybiusSquare;
 import org.whywolk.crypto.lab2.XORCipher;
 import org.whywolk.crypto.lab3.EcbDES;
+import org.whywolk.crypto.lab4.CbcDES;
 
 public class Main {
 
@@ -10,6 +11,7 @@ public class Main {
 //        lab1();
 //        lab2();
         lab3();
+        lab4();
     }
 
     private static void lab1() {
@@ -62,6 +64,22 @@ public class Main {
 
         String nameDec = EcbDES.decrypt(nameEnc, "pass1111");
         String universityDec = EcbDES.decrypt(universityEnc, "hard_pas");
+        System.out.printf("Decrypted: \n\t%s \n\t%s\n", nameDec, universityDec);
+    }
+
+    private static void lab4() {
+        System.out.println("_______Lab_4_______");
+        String name = "Shirshov Alexey Alexandrovich";
+        String university = "Nizhniy Novgorod Technical University";
+        System.out.printf("Original messages: \n\t%s \n\t%s\n", name, university);
+
+        String nameEnc = CbcDES.encrypt(name, "pass1111", "12345678");
+        String universityEnc = CbcDES.encrypt(university, "hard_pas", "otherVec");
+        System.out.printf("Encrypted: \n\t%s \n\t%s\n", nameEnc, universityEnc);
+//        nameEnc = nameEnc.substring(0, 17) + "dd" + nameEnc.substring(19);
+
+        String nameDec = CbcDES.decrypt(nameEnc, "pass1111", "12345678");
+        String universityDec = CbcDES.decrypt(universityEnc, "hard_pas", "otherVec");
         System.out.printf("Decrypted: \n\t%s \n\t%s\n", nameDec, universityDec);
     }
 }

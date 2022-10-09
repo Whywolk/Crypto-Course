@@ -159,28 +159,6 @@ public class DES {
         return dec;
     }
 
-    public static String genKey(String key) {
-        StringBuilder hex = new StringBuilder();
-        byte[] keyBytes = key.getBytes(StandardCharsets.US_ASCII);
-        if (keyBytes.length > 8) throw new RuntimeException("Key length should be 8 chars");
-
-        for (byte b: keyBytes) {
-            b = (byte) (b << 1);
-            if (b % 2 == 0) {
-                b += 1;
-            }
-            hex.append(String.format("%02x", b));
-        }
-
-        return hex.toString();
-    }
-
-    public static byte[] hexKeyToBytes(String hex) {
-        byte[] keyBytes = HexFormat.of().parseHex(hex);
-        if (keyBytes.length != 8) throw new RuntimeException("Key length should be 8 chars");
-        return keyBytes;
-    }
-
     protected static byte[] initialPermutation(byte[] input) {
         byte[] inputBits = DES.toBits(input);
         byte[] outBits = new byte[inputBits.length];
