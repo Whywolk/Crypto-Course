@@ -87,21 +87,28 @@ public class Main {
 
     private static void lab5() {
         System.out.println("_______Lab_5_______");
-        String name = "Shirshov Alexey Alexandrovich";
+        String name = "Shirshov Alexey Alexandrovichfkjgrcgiutr ligu ddddddddddddddddd";
         String university = "Nizhniy Novgorod Technical University";
         System.out.printf("Original messages: \n\t%s \n\t%s\n", name, university);
+        while (true) {
+            String[][] keys = RSA.getKeys(256);
+            String[] publicKey = keys[0];
+            String[] privateKey = keys[1];
 
-        String[] keys = RSA.getKeys(64);
-        String publicKey = keys[0];
-        String privateKey = keys[1];
 
+            String nameEnc = RSA.encrypt(name, publicKey);
+            String universityEnc = RSA.encrypt(university, publicKey);
+//            System.out.printf("Encrypted: \n\t%s \n\t%s\n", nameEnc, universityEnc);
 
-        String nameEnc = RSA.encrypt(name, publicKey);
-        String universityEnc = RSA.encrypt(university, publicKey);
-        System.out.printf("Encrypted: \n\t%s \n\t%s\n", nameEnc, universityEnc);
-
-        String nameDec = RSA.decrypt(nameEnc, privateKey);
-        String universityDec = RSA.decrypt(universityEnc, privateKey);
-        System.out.printf("Decrypted: \n\t%s \n\t%s\n", nameDec, universityDec);
+            String nameDec = RSA.decrypt(nameEnc, privateKey);
+            String universityDec = RSA.decrypt(universityEnc, privateKey);
+//            System.out.printf("Decrypted: \n\t%s \n\t%s\n", nameDec, universityDec);
+            if (!name.equals(nameDec) || !university.equals(universityDec)) {
+                System.out.println(name.length()*2);
+                System.out.printf("Encrypted: \n\t%s \n\t%s\n", nameEnc, universityEnc);
+                System.out.printf("Decrypted: \n\t%s \n\t%s\n", nameDec, universityDec);
+                break;
+            }
+        }
     }
 }

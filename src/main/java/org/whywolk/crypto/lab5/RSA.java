@@ -1,5 +1,7 @@
 package org.whywolk.crypto.lab5;
 
+import org.whywolk.crypto.lab3.DESUtils;
+
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
@@ -7,22 +9,27 @@ import java.util.Random;
 
 public class RSA {
 
-    public static String encrypt(String message, String publicKey) {
-        BigInteger msg = new BigInteger(message.getBytes(StandardCharsets.UTF_8));
-        BigInteger[] keys = keyFromHex(publicKey);
-        BigInteger e = keys[0];
-        BigInteger n = keys[1];
-        BigInteger encMessage = encrypt(msg, e, n);
-        return encMessage.toString(16);
+    public static String encrypt(String message, String[] publicKey) {
+
+        BigInteger e = keyFromHex(publicKey[0]);
+        BigInteger n = keyFromHex(publicKey[1]);
+
+        StringBuilder encMessage = new StringBuilder();
+        BigInteger enc = encrypt(new BigInteger(message.getBytes(StandardCharsets.UTF_8)), e, n);
+        encMessage.append(String.format("%0260x", enc));
+
+        return encMessage.toString();
     }
 
-    public static String decrypt(String message, String privateKey) {
-        BigInteger msg = new BigInteger(HexFormat.of().parseHex(message));
-        BigInteger[] keys = keyFromHex(privateKey);
-        BigInteger d = keys[0];
-        BigInteger n = keys[1];
-        BigInteger decMessage = decrypt(msg, d, n);
-        return new String(decMessage.toByteArray(), StandardCharsets.UTF_8);
+    public static String decrypt(String message, String[] privateKey) {
+        BigInteger d = keyFromHex(privateKey[0]);
+        BigInteger n = keyFromHex(privateKey[1]);
+
+        StringBuilder decMessage = new StringBuilder();
+        BigInteger enc = decrypt(new BigInteger(HexFormat.of().parseHex(message)), d, n);
+        decMessage.append(new String(enc.toByteArray(), StandardCharsets.UTF_8));
+
+        return decMessage.toString();
     }
 
     public static BigInteger encrypt(BigInteger message, BigInteger e, BigInteger n) {
@@ -33,45 +40,20 @@ public class RSA {
         return message.modPow(d, n);
     }
 
-    public static BigInteger[] keyFromHex(String key) {
-        if (key.length() % 8 != 0) throw new RuntimeException("Keys length should be even");
-        String aS = key.substring(0, key.length() / 2);
-        String bS = key.substring(key.length() / 2);
-        return new BigInteger[] {new BigInteger(aS, 16), new BigInteger(bS, 16)};
+    public static BigInteger keyFromHex(String key) {
+        return new BigInteger(key, 16);
     }
 
-    public static String keyToHex(BigInteger a, BigInteger b) {
-
-        StringBuilder aS = new StringBuilder(a.toByteArray());
-        StringBuilder bS = new StringBuilder(b.toString(16));
-
-        if (aS.length() != bS.length()) {
-            int count = Math.abs(bS.length() - aS.length());
-            if (aS.length() < bS.length()) {
-                for (int i = 0; i < count; i++) {
-                    aS.insert(0, "0");
-                }
-            } else {
-                for (int i = 0; i < count; i++) {
-                    bS.insert(0, "0");
-                }
-            }
-        }
-        if (aS.length() % 8 != 0) {
-            int count = aS.length() % 8;
-            for (int i = 0; i < count; i++) {
-                aS.insert(0, "0");
-                bS.insert(0, "0");
-            }
-        }
-        return aS.append(bS).toString();
+    public static String keyToHex(BigInteger key) {
+        String keyStr = key.toString(16);
+        return keyStr;
     }
 
-    public static String[] getKeys(int bitLength) {
+    public static String[][] getKeys(int bitLength) {
         BigInteger[] keys = generateKeys(bitLength);
-        String publicKey = keyToHex(keys[0], keys[1]);
-        String privateKey = keyToHex(keys[2], keys[3]);
-        return new String[] {publicKey, privateKey};
+        String[] publicKey = new String[] {keyToHex(keys[0]), keyToHex(keys[1])};
+        String[] privateKey = new String[] {keyToHex(keys[2]), keyToHex(keys[3])};
+        return new String[][] {publicKey, privateKey};
     }
 
     public static BigInteger[] generateKeys(int bitLength) {
@@ -93,7 +75,6 @@ public class RSA {
         // 5. Generate int d that Modular multiplicative inverse to e mod fi
         // d * e = 1 (mod fi(n))
         BigInteger d = extendedGcd(e, fi)[1];
-//        BigInteger d = inverse(e, fi);
 
         return new BigInteger[] { e, n, d, n };
     }
@@ -108,11 +89,11 @@ public class RSA {
         Random r = new Random();
         BigInteger e;
         do {
-            e = new BigInteger(bitLength * 2, r);
+            e = new BigInteger(fi.bitLength(), r);
 
             // if e == 1 or e > fi(n) then generate new e
             while (e.equals(BigInteger.ONE) || (e.compareTo(fi) > 0)) {
-                e = new BigInteger(bitLength * 2, r);
+                e = new BigInteger(fi.bitLength(), r);
             }
         } while (! gcd(e, fi).equals(BigInteger.ONE));
         return e;
@@ -140,29 +121,5 @@ public class RSA {
         BigInteger p = vals[2];
         BigInteger q = vals[1].subtract(a.divide(b).multiply(vals[2]));
         return new BigInteger[] { d, p, q };
-    }
-
-    //  return p, where ap + bq = d, d = gcd(a, b)
-    private static BigInteger inverse(BigInteger a, BigInteger b) {
-        BigInteger t = BigInteger.ZERO;
-        BigInteger r = a;
-        BigInteger newt = BigInteger.ONE;
-        BigInteger newr = b;
-
-        while (! newr.equals(BigInteger.ZERO)) {
-            BigInteger quotient = r.divide(newr);
-
-            BigInteger tmpNewt = t.subtract(quotient.multiply(newt));
-            t = newt;
-            newt = tmpNewt;
-
-            BigInteger tmpNewr = r.subtract(quotient.multiply(newr));
-            r = newr;
-            newr = tmpNewr;
-        }
-        if (t.compareTo(BigInteger.ZERO) < 0) {
-            t = t.add(b);
-        }
-        return t;
     }
 }
