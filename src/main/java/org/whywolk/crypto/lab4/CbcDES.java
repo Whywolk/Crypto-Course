@@ -7,6 +7,12 @@ import java.util.HexFormat;
 
 public class CbcDES {
 
+    /**
+     * @param message open message
+     * @param key password
+     * @param initVec initialization vector
+     * @return encrypted message in hex string
+     */
     public static String encrypt(String message, String key, String initVec) {
         byte[] keyBytes = DESUtils.genKey(key);
         byte[] IV = initVec.getBytes(StandardCharsets.US_ASCII);
@@ -40,6 +46,12 @@ public class CbcDES {
         return encMessage.toString();
     }
 
+    /**
+     * @param encMessage encrypted message in hex string
+     * @param key password
+     * @param initVec initialization vector
+     * @return open message
+     */
     public static String decrypt(String encMessage, String key, String initVec) {
         byte[] keyBytes = DESUtils.genKey(key);
         byte[] IV = initVec.getBytes(StandardCharsets.US_ASCII);

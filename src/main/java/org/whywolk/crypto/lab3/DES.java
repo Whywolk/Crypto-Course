@@ -1,8 +1,6 @@
 package org.whywolk.crypto.lab3;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.HexFormat;
 
 public class DES {
 
@@ -116,6 +114,11 @@ public class DES {
             51, 45, 33, 48, 44, 49, 39, 56, 34, 53, 46, 42, 50, 36, 29, 32
     };
 
+    /**
+     * @param message open message
+     * @param key password
+     * @return encrypted message
+     */
     public static byte[] encryptBlock(byte[] message, byte[] key) {
         if (message.length != 8) throw new RuntimeException("Message length should be 64 bits");
 
@@ -137,6 +140,11 @@ public class DES {
         return enc;
     }
 
+    /**
+     * @param message encrypted message
+     * @param key password
+     * @return open message
+     */
     public static byte[] decryptBlock(byte[] message, byte[] key) {
         if (message.length != 8) throw new RuntimeException("Message length should be 64 bits");
 
@@ -183,6 +191,7 @@ public class DES {
         return DES.toBytes(outBits);
     }
 
+    // encryption function
     protected static byte[] f(byte[] vec, byte[] key) {
         if (vec.length != 4) throw new RuntimeException("Vector length should be 32 bits");
         if (key.length != 6) throw new RuntimeException("Key length should be 48 bits");
@@ -209,6 +218,7 @@ public class DES {
         return DES.toBytes(outBits);
     }
 
+    // transform 48 bit vector B to 32 bit vector B'
     protected static byte[] SBoxesTransmutation(byte[] B) {
         byte[] Bbits = DES.toBits(B);
 
@@ -257,6 +267,7 @@ public class DES {
         return DES.toBytes(extendedVec);
     }
 
+    // generate 16 48 bit keys
     protected static byte[][] generateKeys(byte[] key) {
         if (key.length != 8) throw new RuntimeException();
         byte[] keyBits = DES.toBits(key);

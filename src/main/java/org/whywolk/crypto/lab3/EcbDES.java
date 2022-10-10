@@ -5,6 +5,11 @@ import java.util.HexFormat;
 
 public class EcbDES {
 
+    /**
+     * @param message open message
+     * @param key password
+     * @return encrypted message in hex string
+     */
     public static String encrypt(String message, String key) {
         byte[] keyBytes = DESUtils.genKey(key);
         byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
@@ -26,6 +31,11 @@ public class EcbDES {
         return encMessage.toString();
     }
 
+    /**
+     * @param encMessage encrypted message
+     * @param key password
+     * @return open message
+     */
     public static String decrypt(String encMessage, String key) {
         byte[] keyBytes = DESUtils.genKey(key);
         byte[] messageBytes = HexFormat.of().parseHex(encMessage);

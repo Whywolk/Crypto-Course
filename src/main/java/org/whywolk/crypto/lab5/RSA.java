@@ -2,43 +2,85 @@ package org.whywolk.crypto.lab5;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Random;
 
 public class RSA {
 
+    /**
+     * @param message open message
+     * @param publicKey String[], where [0] - e, [1] - n
+     * @return encrypted message in hex string
+     */
     public static String encrypt(String message, String[] publicKey) {
         int len = publicKey[0].length() - 2;
-//        if (message.length()*2 >= len) throw new RuntimeException("Message length should be lesser than key length");
+        if (len % 8 != 0) throw new RuntimeException("Key length should be multiple 8");
 
+        // split keys
         BigInteger e = keyFromHex(publicKey[0]);
         BigInteger n = keyFromHex(publicKey[1]);
 
+        // message to hex
+        byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
+        StringBuilder hex = new StringBuilder();
+        for (byte b: messageBytes) {
+            hex.append(String.format("%02x", b));
+        }
+        message = hex.toString();
+
+        // encrypt every len size block
         StringBuilder encMessage = new StringBuilder();
         while (message.length() != 0) {
-            int size = Math.min(message.length(), len/2 - 1);
-            String tmp = message.substring(0, size);
+
+            // get block
+            int size = Math.min(message.length(), len/2);
+            String block = message.substring(0, size);
             message = message.substring(size);
-            BigInteger enc = encrypt(new BigInteger(tmp.getBytes(StandardCharsets.UTF_8)), e, n);
+
+            // encrypt block
+            BigInteger enc = encrypt(new BigInteger(block, 16), e, n);
+
+            // add encrypted block to encrypted message
             encMessage.append(String.format("%0" + (len) + "x", enc));
         }
 
         return encMessage.toString();
     }
 
+    /**
+     * @param message encrypted message in hex string
+     * @param privateKey String[], where [0] - d, [1] - n
+     * @return open message
+     */
     public static String decrypt(String message, String[] privateKey) {
         int len = privateKey[0].length() - 2;
-//        if (message.length() > len) throw new RuntimeException("Message length should be lesser than key length");
+        if (len % 8 != 0) throw new RuntimeException("Key length should be multiple 8");
 
+        // split keys
         BigInteger d = keyFromHex(privateKey[0]);
         BigInteger n = keyFromHex(privateKey[1]);
 
+        // decrypt every len size block
         StringBuilder decMessage = new StringBuilder();
         while (message.length() != 0) {
+
+            // get block
             int size = Math.min(message.length(), len);
-            String tmp = message.substring(0, size);
+            String block = message.substring(0, size);
             message = message.substring(size);
-            BigInteger dec = decrypt(new BigInteger(tmp, 16), d, n);
-            decMessage.append(new String(dec.toByteArray(), StandardCharsets.UTF_8));
+
+            // decrypt block
+            BigInteger dec = decrypt(new BigInteger(block, 16), d, n);
+            byte[] b = dec.toByteArray();
+
+            // for other symbols in UTF Biginteger.toByteArray() adds '0' at [0]
+            // so it's necessary to remove it
+            if (b[0] == 0) {
+                b = Arrays.copyOfRange(b, 1, b.length);
+            }
+
+            // add decrypted block to message
+            decMessage.append(new String(b, StandardCharsets.UTF_8));
         }
 
         return decMessage.toString();
@@ -60,13 +102,28 @@ public class RSA {
         return String.format("%0+" + (bitLength/2 + 2) + "x", key);
     }
 
+
+    /**
+     * @param bitLength
+     * @return String[][], where
+     * String[0] - public key
+     * String[1] - private key
+     */
     public static String[][] getKeys(int bitLength) {
+        if (bitLength % 8 != 0) throw new RuntimeException("Key length should be multiple 8");
         BigInteger[] keys = generateKeys(bitLength);
         String[] publicKey = new String[] {keyToHex(keys[0], bitLength), keyToHex(keys[1], bitLength)};
         String[] privateKey = new String[] {keyToHex(keys[2], bitLength), keyToHex(keys[3], bitLength)};
         return new String[][] {publicKey, privateKey};
     }
 
+    /**
+     * @param bitLength
+     * @return Biginteger[], where
+     * Biginteger[0] - public exponent e
+     * Biginteger[1], [4] - module n
+     * Biginteger[2] - private exponent d
+     */
     public static BigInteger[] generateKeys(int bitLength) {
         // 1. Generate p and q primes
         BigInteger p = RSA.generatePrime(bitLength);
@@ -90,6 +147,7 @@ public class RSA {
         return new BigInteger[] { e, n, d, n };
     }
 
+    // get larg prime
     private static BigInteger generatePrime(int bitLength) {
         Random r = new Random();
         return BigInteger.probablePrime(bitLength, r);

@@ -10,7 +10,7 @@ public class RSATest extends Assert {
 
     @Test
     public void testCorrectKey() {
-        BigInteger[] keys = RSA.generateKeys(1024);
+        BigInteger[] keys = RSA.generateKeys(16);
         BigInteger e = keys[0];
         BigInteger d = keys[2];
         BigInteger n = keys[1];
@@ -27,10 +27,10 @@ public class RSATest extends Assert {
 
     @Test
     public void testWrongKey() {
-        BigInteger[] keys = RSA.generateKeys(1024);
+        BigInteger[] keys = RSA.generateKeys(128);
         BigInteger e = keys[0];
         BigInteger n = keys[1];
-        BigInteger d = RSA.generateKeys(1024)[2];
+        BigInteger d = RSA.generateKeys(128)[2];
 
         BigInteger message = new BigInteger("Hello".getBytes(StandardCharsets.UTF_8));
         BigInteger encMessage = RSA.encrypt(message, e, n);

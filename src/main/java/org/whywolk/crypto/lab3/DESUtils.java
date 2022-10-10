@@ -5,6 +5,7 @@ import java.util.HexFormat;
 
 public class DESUtils {
 
+    // add even bits for correction
     public static byte[] genKey(String key) {
 
         byte[] keyBytes = key.getBytes(StandardCharsets.US_ASCII);
@@ -33,6 +34,7 @@ public class DESUtils {
         return keyBytes;
     }
 
+    // split array into arrays of arrays (blocks of arrays)
     public static byte[][] splitIntoBlocks(byte[] bytes, int blockSize) {
         int size = bytes.length / blockSize;
         if (bytes.length % blockSize != 0) {
